@@ -3,10 +3,8 @@ import sqlite3
 
 DB_NAME = "project.db"
 
-# Put your Ticketmaster API key here
-TICKETMASTER_API_KEY = "PUT_API_KEY_HERE"
+TICKETMASTER_API_KEY = "1wTwzG4mA9DsQFFEm1A5Q0cBfEGIRxhA"
 
-# Use the same artist names as your iTunes script so joins work cleanly
 ARTISTS = [
     "Taylor Swift",
     "Drake",
@@ -60,13 +58,11 @@ def store_events(limit=25):
             timeout=15
         )
 
-        # If the request fails, skip that artist
         if response.status_code != 200:
             continue
 
         data = response.json()
 
-        # If no events, skip
         if "_embedded" not in data or "events" not in data["_embedded"]:
             continue
 
@@ -75,7 +71,7 @@ def store_events(limit=25):
                 break
 
             try:
-                event_id = str(event["id"])  # ensure TEXT
+                event_id = str(event["id"]) 
                 venue_info = event["_embedded"]["venues"][0]
                 venue_name = venue_info.get("name", "Unknown Venue")
                 city_name = venue_info.get("city", {}).get("name", "Unknown City")

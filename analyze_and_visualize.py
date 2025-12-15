@@ -97,14 +97,11 @@ def main():
 
     conn.close()
 
-    # Write calculated data to a text file (rubric requirement)
     write_results_to_file(song_counts, event_counts, avg_prices)
     print(f"Wrote calculations to {OUTPUT_TXT}")
 
-    # Visualization 1: iTunes songs per artist
     plot_bar(song_counts, "iTunes Songs Per Artist", "Number of Songs")
 
-    # Visualization 2: Ticketmaster events per artist
     plot_bar(event_counts, "Ticketmaster Events Per Artist", "Number of Events")
 
 
