@@ -2,7 +2,7 @@ import requests
 import sqlite3
 
 DB_NAME = "project.db"
-TICKETMASTER_API_KEY = "PUT_API_KEY_HERE"
+TICKETMASTER_API_KEY = "1wTwzG4mA9DsQFFEm1A5Q0cBfEGIRxhA"
 
 ARTISTS = [
     "Taylor Swift",
