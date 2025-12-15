@@ -1,53 +1,75 @@
+import requests
 import sqlite3
-import matplotlib.pyplot as plt
-from collections import defaultdict
 
 DB_NAME = "project.db"
+TICKETMASTER_API_KEY = "PUT_API_KEY_HERE"
 
-def get_daily_activity():
+ARTISTS = [
+    "Taylor Swift",
+    "Drake",
+    "Kendrick Lamar",
+    "Billie Eilish"
+]
+
+def create_table():
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT
-            substr(e.created_at, 1, 10) AS date,
-            COUNT(e.event_id),
-            w.precipitation
-        FROM events e
-        JOIN weather w ON substr(e.created_at, 1, 10) = w.date
-        GROUP BY date
+        CREATE TABLE IF NOT EXISTS events (
+            event_id TEXT PRIMARY KEY,
+            artist TEXT,
+            venue TEXT,
+            city TEXT
+        )
     """)
 
-    rows = cur.fetchall()
+    conn.commit()
     conn.close()
-    return rows
 
 
-def plot_events_over_time(data):
-    dates = [row[0] for row in data]
-    counts = [row[1] for row in data]
+def store_events(limit=25):
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
 
-    plt.figure()
-    plt.plot(dates, counts)
-    plt.xticks(rotation=45)
-    plt.title("GitHub Events Per Day")
-    plt.tight_layout()
-    plt.show()
+    inserted = 0
 
+    for artist in ARTISTS:
+        response = requests.get(
+            "https://app.ticketmaster.com/discovery/v2/events.json",
+            params={
+                "apikey": TICKETMASTER_API_KEY,
+                "keyword": artist,
+                "size": 50
+            }
+        ).json()
 
-def plot_precip_vs_events(data):
-    precipitation = [row[2] for row in data]
-    counts = [row[1] for row in data]
+        if "_embedded" not in response:
+            continue
 
-    plt.figure()
-    plt.scatter(precipitation, counts)
-    plt.xlabel("Precipitation")
-    plt.ylabel("GitHub Events")
-    plt.title("Precipitation vs GitHub Activity")
-    plt.show()
+        for event in response["_embedded"]["events"]:
+            if inserted >= limit:
+                break
+
+            venue = event["_embedded"]["venues"][0]
+            cur.execute("""
+                INSERT OR IGNORE INTO events
+                VALUES (?, ?, ?, ?)
+            """, (
+                event["id"],
+                artist,
+                venue["name"],
+                venue["city"]["name"]
+            ))
+
+            if cur.rowcount > 0:
+                inserted += 1
+
+    conn.commit()
+    conn.close()
+    print(f"Inserted {inserted} Ticketmaster events.")
 
 
 if __name__ == "__main__":
-    data = get_daily_activity()
-    plot_events_over_time(data)
-    plot_precip_vs_events(data)
+    create_table()
+    store_events(limit=25)
