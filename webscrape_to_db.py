@@ -25,7 +25,14 @@ def create_table():
 
 def store_web_data():
     url = "https://en.wikipedia.org/wiki/List_of_best-selling_music_artists"
-    response = requests.get(url, timeout=20)
+    headers = {
+        "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
+        " AppleWebKit/537.36 (KHTML, like Gecko)"
+        " Chrome/119.0.0.0 Safari/537.36"
+    }
+
+    response = requests.get(url, headers=headers, timeout=20)
     html = response.text
     soup = BeautifulSoup(html, "html.parser")
 
@@ -41,17 +48,22 @@ def store_web_data():
             cells = row.find_all(["td", "th"])
             if len(cells) < 2:
                 continue
+
             link = cells[0].find("a")
             if not link:
                 continue
+
             name = link.get_text(strip=True)
             if name not in ARTISTS:
                 continue
+
             claimed = cells[-1].get_text(" ", strip=True)
+
             cur.execute("""
-                INSERT OR REPLACE INTO web_artists (artist_name, claimed_sales)
+                INSERT OR REPLACE INTO web_artists
                 VALUES (?, ?)
             """, (name, claimed))
+
             inserted += 1
 
     conn.commit()
