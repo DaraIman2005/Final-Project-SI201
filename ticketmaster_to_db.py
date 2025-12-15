@@ -16,13 +16,13 @@ def create_table():
     cur = conn.cursor()
 
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS events (
-            event_id TEXT PRIMARY KEY,
-            artist TEXT,
-            venue TEXT,
-            city TEXT
-        )
-    """)
+    CREATE TABLE IF NOT EXISTS events (
+        event_id TEXT PRIMARY KEY,
+        artist TEXT,
+        venue TEXT,
+        city TEXT
+    )
+""")
 
     conn.commit()
     conn.close()
