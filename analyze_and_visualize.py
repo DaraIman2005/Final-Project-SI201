@@ -68,13 +68,16 @@ def write_results_to_file(song_counts, event_counts, web_sales, filename=OUTPUT_
 def plot_bar(data, title, ylabel):
     labels = [x[0] for x in data]
     values = [x[1] for x in data]
-    plt.figure()
-    plt.bar(labels, values)
-    plt.title(title)
-    plt.ylabel(ylabel)
-    plt.xticks(rotation=30)
+
+    plt.figure(figsize=(8, 5))
+    plt.bar(labels, values, color=["#FF6B6B", "#4ECDC4", "#556270", "#C44D58"])
+    plt.title(title, fontsize=16, fontweight="bold")
+    plt.ylabel(ylabel, fontsize=14)
+    plt.grid(axis="y", linestyle="--", alpha=0.5)
+    plt.xticks(rotation=20, fontsize=12)
     plt.tight_layout()
     plt.show()
+
 
 def main():
     conn = sqlite3.connect(DB_NAME)
@@ -90,6 +93,7 @@ def main():
         plot_bar(event_counts, "Ticketmaster Events Per Artist", "Number of Events")
     if web_sales:
         plot_bar(web_sales, "Claimed Sales Per Artist (Wikipedia)", "Claimed Sales (approx)")
+
 
 if __name__ == "__main__":
     main()
