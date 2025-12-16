@@ -54,9 +54,7 @@ def store_web_data():
                 continue
 
             name = link.get_text(strip=True)
-            if name not in ARTISTS:
-                continue
-
+    
             claimed = cells[-1].get_text(" ", strip=True)
 
             cur.execute("""
