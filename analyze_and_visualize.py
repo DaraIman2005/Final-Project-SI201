@@ -68,7 +68,6 @@ def write_results_to_file(song_counts, event_counts, web_sales, filename=OUTPUT_
 def plot_bar(data, title, ylabel):
     labels = [x[0] for x in data]
     values = [x[1] for x in data]
-
     plt.figure(figsize=(8, 5))
     plt.bar(labels, values, color=["#FF6B6B", "#4ECDC4", "#556270", "#C44D58"])
     plt.title(title, fontsize=16, fontweight="bold")
@@ -78,6 +77,42 @@ def plot_bar(data, title, ylabel):
     plt.tight_layout()
     plt.show()
 
+def plot_total_activity(song_counts, event_counts):
+    song_dict = dict(song_counts)
+    event_dict = dict(event_counts)
+    artists = set(song_dict.keys()) | set(event_dict.keys())
+    totals = []
+    for artist in artists:
+        total = song_dict.get(artist, 0) + event_dict.get(artist, 0)
+        totals.append((artist, total))
+    plt.figure()
+    plt.bar([x[0] for x in totals], [x[1] for x in totals])
+    plt.title("Total Artist Activity (Songs + Events)")
+    plt.ylabel("Total Count")
+    plt.xticks(rotation=30)
+    plt.tight_layout()
+    plt.show()
+
+def plot_sales_vs_songs(song_counts, web_sales):
+    song_dict = dict(song_counts)
+    sales_dict = dict(web_sales)
+    x = []
+    y = []
+    labels = []
+    for artist in song_dict:
+        if artist in sales_dict:
+            x.append(song_dict[artist])
+            y.append(sales_dict[artist])
+            labels.append(artist)
+    plt.figure()
+    plt.scatter(x, y)
+    for i, label in enumerate(labels):
+        plt.text(x[i], y[i], label, fontsize=9)
+    plt.title("Claimed Sales vs Number of Songs")
+    plt.xlabel("Number of Songs")
+    plt.ylabel("Claimed Sales (approx)")
+    plt.tight_layout()
+    plt.show()
 
 def main():
     conn = sqlite3.connect(DB_NAME)
@@ -85,8 +120,10 @@ def main():
     event_counts = fetch_ticketmaster_event_counts(conn)
     web_sales = fetch_web_claimed_sales(conn)
     conn.close()
+
     write_results_to_file(song_counts, event_counts, web_sales)
     print(f"Wrote calculations to {OUTPUT_TXT}")
+
     if song_counts:
         plot_bar(song_counts, "iTunes Songs Per Artist", "Number of Songs")
     if event_counts:
@@ -94,6 +131,8 @@ def main():
     if web_sales:
         plot_bar(web_sales, "Claimed Sales Per Artist (Wikipedia)", "Claimed Sales (approx)")
 
+    plot_total_activity(song_counts, event_counts)
+    plot_sales_vs_songs(song_counts, web_sales)
 
 if __name__ == "__main__":
     main()
