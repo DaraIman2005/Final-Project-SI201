@@ -9,7 +9,7 @@ def fetch_itunes_song_counts(conn):
     cur.execute("""
         SELECT a.name, COUNT(s.track_id) AS song_count
         FROM artists a
-        JOIN songs s ON a.artist_id = s.artist_id
+        LEFT JOIN songs s ON a.artist_id = s.artist_id
         GROUP BY a.name
         ORDER BY song_count DESC
     """)
@@ -69,11 +69,20 @@ def plot_bar(data, title, ylabel):
     labels = [x[0] for x in data]
     values = [x[1] for x in data]
     plt.figure(figsize=(8, 5))
-    plt.bar(labels, values, color=["#FF6B6B", "#4ECDC4", "#556270", "#C44D58"])
+    bars = plt.bar(labels, values, color=["#FF6B6B", "#4ECDC4", "#556270", "#C44D58"])
     plt.title(title, fontsize=16, fontweight="bold")
     plt.ylabel(ylabel, fontsize=14)
     plt.grid(axis="y", linestyle="--", alpha=0.5)
     plt.xticks(rotation=20, fontsize=12)
+    for bar, val in zip(bars, values):
+        plt.text(
+            bar.get_x() + bar.get_width() / 2,
+            val,
+            str(val),
+            ha="center",
+            va="bottom",
+            fontsize=11
+        )
     plt.tight_layout()
     plt.show()
 
@@ -85,11 +94,23 @@ def plot_total_activity(song_counts, event_counts):
     for artist in artists:
         total = song_dict.get(artist, 0) + event_dict.get(artist, 0)
         totals.append((artist, total))
-    plt.figure()
-    plt.bar([x[0] for x in totals], [x[1] for x in totals])
-    plt.title("Total Artist Activity (Songs + Events)")
-    plt.ylabel("Total Count")
-    plt.xticks(rotation=30)
+    labels = [x[0] for x in totals]
+    values = [x[1] for x in totals]
+    plt.figure(figsize=(8, 5))
+    bars = plt.bar(labels, values)
+    plt.title("Total Artist Activity (Songs + Events)", fontsize=16, fontweight="bold")
+    plt.ylabel("Total Count", fontsize=14)
+    plt.xticks(rotation=20, fontsize=12)
+    plt.grid(axis="y", linestyle="--", alpha=0.5)
+    for bar, val in zip(bars, values):
+        plt.text(
+            bar.get_x() + bar.get_width() / 2,
+            val,
+            str(val),
+            ha="center",
+            va="bottom",
+            fontsize=11
+        )
     plt.tight_layout()
     plt.show()
 
@@ -104,13 +125,14 @@ def plot_sales_vs_songs(song_counts, web_sales):
             x.append(song_dict[artist])
             y.append(sales_dict[artist])
             labels.append(artist)
-    plt.figure()
+    plt.figure(figsize=(8, 5))
     plt.scatter(x, y)
     for i, label in enumerate(labels):
-        plt.text(x[i], y[i], label, fontsize=9)
-    plt.title("Claimed Sales vs Number of Songs")
-    plt.xlabel("Number of Songs")
-    plt.ylabel("Claimed Sales (approx)")
+        plt.text(x[i], y[i], label, fontsize=10)
+    plt.title("Claimed Sales vs Number of Songs", fontsize=16, fontweight="bold")
+    plt.xlabel("Number of Songs", fontsize=14)
+    plt.ylabel("Claimed Sales (approx)", fontsize=14)
+    plt.grid(True, linestyle="--", alpha=0.5)
     plt.tight_layout()
     plt.show()
 
@@ -123,6 +145,9 @@ def main():
 
     write_results_to_file(song_counts, event_counts, web_sales)
     print(f"Wrote calculations to {OUTPUT_TXT}")
+    print("Song counts:", song_counts)
+    print("Event counts:", event_counts)
+    print("Web sales:", web_sales)
 
     if song_counts:
         plot_bar(song_counts, "iTunes Songs Per Artist", "Number of Songs")

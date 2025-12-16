@@ -2,8 +2,10 @@ Calculated Results (iTunes + Ticketmaster + Web)
 ===============================================
 
 1) iTunes Song Counts per Artist
-- Taylor Swift: 50 songs
 - Drake: 50 songs
+- Taylor Swift: 50 songs
+- Billie Eilish: 0 songs
+- Kendrick Lamar: 0 songs
 
 2) Ticketmaster Event Counts per Artist
 - Taylor Swift: 25 events
